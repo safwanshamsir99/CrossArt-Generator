@@ -3,7 +3,7 @@
 An upgraded version of the previous crosstab generator 
 
 You can access the crosstab generator through the link below <br />
-🠊 https://invoke-analytics-crosstab-generator-v3-generator-6pyb9x.streamlit.app/
+🠊 https://invoke-analytics-crosstab-generator-v3.streamlit.app/
 
 ## What is Crosstab?
 
@@ -105,7 +105,7 @@ Contains all of the components; front-end component for streamlit and back-end c
 
 ### Built With
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://invoke-analytics-crosstabs-prod-generator-cs1fpd.streamlitapp.com/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://invoke-analytics-crosstab-generator-v3.streamlit.app/)
 
 ## Getting Started
 
