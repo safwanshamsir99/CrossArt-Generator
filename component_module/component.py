@@ -28,7 +28,7 @@ def page_style():
 
     # configure the default settings of the page.
     icon = Image.open('photos/invoke_icon.jpg')
-    st.set_page_config(page_icon=icon)
+    st.set_page_config(page_title="CrossArt Generator", page_icon=icon)
     st.markdown(hide_st_style, unsafe_allow_html=True)
     image = Image.open('photos/invoke_logo.png')
     st.title('CrossArt Generator')
