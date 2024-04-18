@@ -11,7 +11,7 @@ def write_table(
         name_sort:list[str], 
         weight:str,
         col_seqs:dict
-        )->pd.ExcelWriter:
+        )->bytes:
     
     '''
     Backend function to write the crosstabs table.

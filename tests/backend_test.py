@@ -1,6 +1,8 @@
 from app.component_module.table import write_table
 from pathlib import Path
 import pandas as pd
+from app.chart_module.chart import load_chart
+from app.component_module.viz import draw_chart
 
 # --------------------------- Crosstabs Generator ------------------------------------------
 '''
@@ -27,7 +29,7 @@ def test_weighted_file_exist():
 def test_write_table():
     '''
     Test to check the write_table() function is working
-    by returning pandas Excelwriter.
+    by returning pandas Excelwriter in bytes.
     '''
     file_path = Path.cwd() / 'tests' / 'test_crosstabs.csv'
 
@@ -69,20 +71,29 @@ NOTE:
 
 Only top script will be gone through unit testing process.
 Reason: 
-    1. Functions in middle script will call the functions in base script.
-    2. Functions in top script will call the functions in middle script.
+    1. Functions in top script will call the functions in helper script.
 
 This is also known as integration unit testing. 
 '''
-def test_weighted_file_exist():
+def test_crosstabs_file_exist():
     '''
-    Test to check whether the test_crosstabs.csv file is exist.
+    Test to check whether the test_chartgen.xlsx file is exist.
     '''
-    file_path = Path.cwd() / 'tests' / 'test_crosstabs.csv'
+    file_path = Path.cwd() / 'tests' / 'test_chartgen.xlsx'
 
-    assert file_path.exists() == True, "test_crosstabs.csv does not exist"
+    assert file_path.exists() == True, "test_chartgen.xlsx does not exist"
 
+def test_draw_chart():
+    '''
+    Test to check whether the te
+    '''
+    file_path = Path.cwd() / 'tests' / 'test_chartgen.xlsx'
 
+    dfs, sheet_names, _ = load_chart(df_charts=file_path)
+    df_charts = draw_chart(dfs=dfs, sheet_names=sheet_names)
 
+    assert isinstance(
+        df_charts, bytes
+        ), "Output is not in bytes"
 
 # --------------------------- Utils Function ------------------------------------------
