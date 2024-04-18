@@ -2,10 +2,10 @@ import streamlit as st
 from PIL import Image
 import pandas as pd
 from typing import Any
-from utils_module.utils import load, demography, col_search, sorter
-from chart_module.chart import load_chart
-from component_module.table import write_table
-from component_module.viz import draw_chart
+from app.utils_module.utils import load, demography, col_search, sorter
+from app.chart_module.chart import load_chart
+from app.component_module.table import write_table
+from app.component_module.viz import draw_chart
 
 
 def page_style():

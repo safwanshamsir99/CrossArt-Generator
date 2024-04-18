@@ -1,5 +1,5 @@
-from crosstab_module.crosstab import single_choice_crosstab_column, single_choice_crosstab_row
-from crosstab_module.crosstab import multi_choice_crosstab_column, multi_choice_crosstab_row
+from app.crosstab_module.crosstab import single_choice_crosstab_column, single_choice_crosstab_row
+from app.crosstab_module.crosstab import multi_choice_crosstab_column, multi_choice_crosstab_row
 import pandas as pd
 
 def get_column(df:pd.DataFrame, q:str, multi:list[str], name_sort:list[str], demo:str, weight:str, col_seqs:list[list[str]], writer:pd.ExcelWriter, start:int)->tuple[int,pd.ExcelWriter,pd.ExcelWriter]:

@@ -1,5 +1,5 @@
 from io import BytesIO
-from utils_module.processor import get_row, get_column
+from app.utils_module.processor import get_row, get_column
 import pandas as pd
 
 def write_table(
@@ -11,7 +11,7 @@ def write_table(
         name_sort:list[str], 
         weight:str,
         col_seqs:dict
-        )->pd.DataFrame:
+        )->bytes:
     
     '''
     Backend function to write the crosstabs table.
@@ -30,7 +30,7 @@ def write_table(
             - Value: Sorted unique value of the key demography column.
 
     Return:
-        - df_xlsx: pandas dataframe that contains crosstabs table.
+        - df_xlsx: conversion result of pandas ExcelWriter that contains crosstabs table into bytes.
     '''
 
     # Initialize excel file
@@ -45,7 +45,7 @@ def write_table(
             # start: loop counter to build the crosstabs table
             start = 1
             for q in q_ls:
-                start, workbook, worksheet = get_column(
+                start, _, _ = get_column(
                     df=df, 
                     q=q, 
                     multi=multi, 
@@ -60,7 +60,7 @@ def write_table(
             # start_2: loop counter to build the crosstabs table
             start_2 = 1
             for q in q_ls:
-                start_2, workbook, worksheet = get_row(
+                start_2, _, _ = get_row(
                     df=df, 
                     q=q, 
                     multi=multi, 
@@ -77,7 +77,7 @@ def write_table(
             # start: loop counter to build the crosstabs table
             start = 1
             for q in q_ls:
-                start, workbook, worksheet = get_column(
+                start, _, _ = get_column(
                     df=df, 
                     q=q, 
                     multi=multi, 
@@ -93,7 +93,7 @@ def write_table(
             # start_2: loop counter to build the crosstabs table
             start_2 = 1
             for q in q_ls:
-                start_2, workbook, worksheet = get_row(
+                start_2, _, _ = get_row(
                     df=df, 
                     q=q, 
                     multi=multi, 
