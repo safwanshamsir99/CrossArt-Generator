@@ -1,7 +1,5 @@
-
 import pandas as pd
 import re
-from typing import Any
 
 def load(df:pd.DataFrame)->pd.DataFrame:
     '''

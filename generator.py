@@ -1,4 +1,4 @@
-from component_module.component import (
+from component import (
     page_style,
     page_tabs,
     init_crossgen_tab,

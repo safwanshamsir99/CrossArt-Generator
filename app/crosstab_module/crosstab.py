@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from utils_module.utils import sort_order
+from app.utils_module.utils import sort_order
 
 def single_choice_crosstab_column(
         df:pd.DataFrame, 
