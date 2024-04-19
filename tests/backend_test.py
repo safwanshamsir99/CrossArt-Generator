@@ -1,8 +1,15 @@
 from app.component_module.table import write_table
 from pathlib import Path
 import pandas as pd
+import pytest
 from app.chart_module.chart import load_chart
 from app.component_module.viz import draw_chart
+from app.utils_module.utils import (
+    load, 
+    demography,
+    col_search,
+    sorter
+)
 
 # --------------------------- Crosstabs Generator ------------------------------------------
 '''
@@ -12,7 +19,7 @@ NOTE:
     3. Top script: table.py (in component_module folder)
 
 Only top script will be gone through unit testing process.
-Reason: 
+Reasons: 
     1. Functions in middle script will call the functions in base script.
     2. Functions in top script will call the functions in middle script.
 
@@ -98,8 +105,89 @@ def test_draw_chart():
         ), "Output is not in bytes"
 
 # --------------------------- Utils Function ------------------------------------------
+@pytest.fixture
+def get_test_file_path()->Path:
+    '''
+    Pytest fixture to return path for the test file. 
+    '''
+    test_file_path = Path.cwd() / 'tests' / 'test_crosstabs.csv'
+    return test_file_path
 
+@pytest.fixture
+def get_test_df_crosstabs(get_test_file_path: Path)->pd.DataFrame:
+    '''
+    Extended fixture to read the test file path and 
+    return read pandas dataframe
+    '''
+    df_crosstabs = pd.read_csv(get_test_file_path)
+    return df_crosstabs
 
+def test_load(get_test_file_path: Path):
+    '''
+    Test the load feature into pandas dataframe.
+    '''
+    df = load(get_test_file_path)
+    assert isinstance(
+        df, pd.DataFrame
+        ), "Output is not pandas dataframe"
 
+def test_demography(get_test_df_crosstabs:pd.DataFrame):
+    '''
+    Test the demography auto-detection method based on certain demography keyword.
+    '''
+    demo_list = demography(get_test_df_crosstabs)
+    assert isinstance(
+        demo_list, list
+    ), "Output is not a list"
+
+def test_col_search(get_test_df_crosstabs:pd.DataFrame):
+    '''
+    Test the column auto-detection search based on any keyword.
+    Extended fixture to return list of searched column based on keyword.
+    '''
+    col_with_keyword = col_search(df=get_test_df_crosstabs, key='LIKERT')
+    assert isinstance(
+        col_with_keyword, list
+    ), "Output is not a list"
+    assert all(
+        'LIKERT' in col for col in col_with_keyword
+        ), "No keyword 'LIKERT' exists in the list"
+
+def test_sorter(get_test_df_crosstabs:pd.DataFrame):
+    '''
+    Test the sorter function to sort the selected demography column.
+    '''
+    sorted_demo_list = sorter(demo='IncomeGroup', df=get_test_df_crosstabs)
+    assert isinstance(
+        sorted_demo_list, list
+    ), "Output is not a list"
+    expected_order = ['B40', 'M40', 'T20']
+    assert (
+        sorted_demo_list == expected_order
+        ), "Output is not sorted in the expected order"
+    
+'''
+NOTE: 
+    - sort_order() function in the utils.py (in utils_module folder) will not undergo unit testing.
+    Reasons:
+        - sort_order() function is a helper function when the crosstabs table is being build.
+        - It is being utilized in the base script; crosstabs.py (in crosstabs_module folder)
+        - Hence, it is hard to do a comparison of the expected output with the actual output
+    
+    - With that being said, the expected output and actual output can be tested manually only.
+    Steps:
+        1. Upload the weighted survey responses on the crosstabs generator. 
+        2. During the sort order option, select any question column that you want to sort the 
+        order based on the name. Usually, it is a likert question column with these unique values;
+            1) Very negative
+            2) Negative
+            3) Neutral
+            4) Positive
+            5) Very positive
+        3. Once the crosstabs has been processed and downloaded, open the file and compare the 
+        selected column that you want to sort by name order. 
+        4. If it is sorted by the order of the name, then the sort_order() function wort as 
+        intended.
+'''
 
 
