@@ -85,7 +85,8 @@ def test_crosstabs_file_exist():
 
 def test_draw_chart():
     '''
-    Test to check whether the te
+    Test to check whether the draw_chart() function is working
+    by returning xlsxwriter charts in bytes.
     '''
     file_path = Path.cwd() / 'tests' / 'test_chartgen.xlsx'
 
