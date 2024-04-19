@@ -98,3 +98,8 @@ def test_draw_chart():
         ), "Output is not in bytes"
 
 # --------------------------- Utils Function ------------------------------------------
+
+
+
+
+
