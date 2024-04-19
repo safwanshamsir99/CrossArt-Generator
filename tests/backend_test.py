@@ -1,10 +1,10 @@
-from app.component_module.table import write_table
+from component_module.table import write_table
 from pathlib import Path
 import pandas as pd
 import pytest
-from app.chart_module.chart import load_chart
-from app.component_module.viz import draw_chart
-from app.utils_module.utils import (
+from chart_module.chart import load_chart
+from component_module.viz import draw_chart
+from utils_module.utils import (
     load, 
     demography,
     col_search,
