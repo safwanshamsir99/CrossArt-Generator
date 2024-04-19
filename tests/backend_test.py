@@ -44,11 +44,11 @@ def test_write_table():
     demos = ['Gender', 'IncomeGroup']
     wise = 'Both'
     q_ls = [
-        '1. [LIKERT] Opinions regarding the cancellation of the Batu Pahat factory license that made Allah stockings',
+        '1. [LIKERT] Opinions',
         '2. What is your dream job field?'
     ]
     multi = []
-    name_sort = ['1. [LIKERT] Opinions regarding the cancellation of the Batu Pahat factory license that made Allah stockings']
+    name_sort = ['1. [LIKERT] Opinions']
     weight = 'untrimmed_weight'
     col_seqs = {
         'Gender': ['Male', 'Female'],
