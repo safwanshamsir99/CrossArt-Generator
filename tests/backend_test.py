@@ -1,4 +1,4 @@
-from  app.component_module.table import write_table
+from app.component_module.table import write_table
 from pathlib import Path
 import pandas as pd
 import pytest
