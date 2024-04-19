@@ -94,12 +94,12 @@ def sorter(demo:str, df:pd.DataFrame)->list[str]:
                                      1 if re.match(r'^S', x) else
                                      2 if re.match(r'^R|^L', x) else 3))
     
-def sort_order(df:pd.DataFrame, sorting:list[str])->pd.DataFrame:
+def sort_order(df:list[pd.DataFrame], sorting:str)->pd.DataFrame:
     '''
     A function to sort the order of crosstabs table based on the column selected by the user,
 
     Args:
-        - df: Whole dataframe [pandas dataframe]
+        - df: List of pandas dataframe 
         - sorting: keyword to match [str]
 
     Return:

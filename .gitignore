@@ -160,8 +160,8 @@ cython_debug/
 #.idea/
 
 # Test file
-*.csv
-*.xlsx
+# *.csv
+# *.xlsx
 
 # STREAMLIT
 .streamlit/
