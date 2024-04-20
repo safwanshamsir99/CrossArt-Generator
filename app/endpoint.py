@@ -14,6 +14,9 @@ import pandas as pd
 #     weight: str
 #     col_seqs: dict
 
+#     class Config:
+#         arbitrary_types_allowed = True
+
 # class Charts(BaseModel):
 #     dfs: list[pd.DataFrame]
 #     sheet_names: list
