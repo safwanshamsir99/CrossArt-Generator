@@ -21,6 +21,9 @@ import pandas as pd
 #     dfs: list[pd.DataFrame]
 #     sheet_names: list
 
+#     class Config:
+#         arbitrary_types_allowed = True
+
 description = """
 This is a crosstabs generator API from crosstabs-generator-v3.
 """
