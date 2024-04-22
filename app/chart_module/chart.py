@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from typing import Any
 
-def load_chart(df_charts:pd.DataFrame)->tuple[list[pd.DataFrame],list,str]:
+def load_chart(df_charts:pd.DataFrame)->tuple[list[pd.DataFrame],list[str],str]:
     '''
     A function to read and load the streamlit dataframe into pandas dataframe.
     
@@ -12,7 +12,7 @@ def load_chart(df_charts:pd.DataFrame)->tuple[list[pd.DataFrame],list,str]:
     
     Return:
         - dfs: List of pandas dataframe.
-        - sheet_names: Name of the sheet
+        - sheet_names: List of name of the sheet
         - df_chartsname: Name of the uploaded file
     '''
     df_chartsname = df_charts.name
