@@ -7,3 +7,4 @@ def test_root():
     response = client.get("/crossart/")
     assert response.status_code == 200, "Response 404, failed"
     assert response.json() == {"status": "ok", "type": "crosstabsgen"}, "No response"
+
