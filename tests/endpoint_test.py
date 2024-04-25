@@ -9,4 +9,7 @@ def test_root():
     assert response.json() == {"status": "ok", "type": "crosstabsgen"}, "No response"
 
 def test_crosstabs_gen():
-    pass
+    '''
+    TODO: TEST ENDPOINT CROSSTABS
+    '''
+    ...

@@ -151,7 +151,7 @@ async def generate_chart(chart: ChartSchema):
 
     Request:
         - dfs: list of pandas DataFrame 
-        - sheet_names: listof the sheet names in the crosstabs file. 
+        - sheet_names: list of the sheet names in the crosstabs file. 
 
     Return:
         - df_charts: crosstabs table that contains clustered column chart in bytes.
