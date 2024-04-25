@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from typing import Any
 
-def load_chart(df_charts:pd.DataFrame)->tuple[list[pd.DataFrame],list[str],str]:
+def load_chart(df_charts: pd.DataFrame)->tuple[list[pd.DataFrame], list[str], str]:
     '''
     A function to read and load the streamlit dataframe into pandas dataframe.
     

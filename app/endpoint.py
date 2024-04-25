@@ -5,8 +5,8 @@ from app.component_module.table import write_table
 from app.component_module.viz import draw_chart
 from app.schema import (
     DataframeSchema,
-    ColumnSearch,
-    DemoSorter,
+    ColumnSearchSchema,
+    DemoSorterSchema,
     CrosstabSchema,
     ChartSchema
 )
@@ -55,7 +55,7 @@ async def autoselect_demography(demo: DataframeSchema):
     return {"demo_list": demo_list}
 
 @router.post("/colsearch", tags=["Column search"])
-async def get_search_column(search_column: ColumnSearch):
+async def get_search_column(search_column: ColumnSearchSchema):
     '''
     Endpoint to autoselect column/s with the keyword.
 
@@ -73,7 +73,7 @@ async def get_search_column(search_column: ColumnSearch):
     return {"column with string": columns_with_string}
 
 @router.post("/demo_sorter", tags=["Demography sorter"])
-async def get_demo_sorter(demo_sorter:DemoSorter):
+async def get_demo_sorter(demo_sorter:DemoSorterSchema):
     '''
     Endpoint to sort the list of the unique value in the demographic column.
 

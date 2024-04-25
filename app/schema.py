@@ -3,18 +3,30 @@ import pandas as pd
 from typing import List, Dict
 
 class DataframeSchema(BaseModel):
+    '''
+    Pydantic schema for pandas dataframe data type with BaseModel.
+    '''
     df: pd.DataFrame
 
     class Config:
         arbitrary_types_allowed = True
 
-class ColumnSearch(DataframeSchema):
+class ColumnSearchSchema(DataframeSchema):
+    '''
+    Pydantic schema for col_search() endpoint with DataframeSchema.
+    '''
     key: str
 
-class DemoSorter(DataframeSchema):
+class DemoSorterSchema(DataframeSchema):
+    '''
+    Pydantic schema for sorter() endpoint with DataframeSchema.
+    '''
     demo: str
 
 class CrosstabSchema(DataframeSchema): 
+    '''
+    Pydantic schema for crosstabs generator endpoint with DataframeSchema.
+    '''
     demos: List[str] 
     wise: str
     q_ls: List[str] 
@@ -24,6 +36,9 @@ class CrosstabSchema(DataframeSchema):
     col_seqs: Dict
 
 class ChartSchema(BaseModel):
+    '''
+    Pydantic schema for chart generator endpoint with BaseModel. 
+    '''
     dfs: List[pd.DataFrame]
     sheet_names: List[str]
 

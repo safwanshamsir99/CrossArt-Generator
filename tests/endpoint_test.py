@@ -8,3 +8,5 @@ def test_root():
     assert response.status_code == 200, "Response 404, failed"
     assert response.json() == {"status": "ok", "type": "crosstabsgen"}, "No response"
 
+def test_crosstabs_gen():
+    pass
