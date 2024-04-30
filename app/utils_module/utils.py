@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 
-def load(df:pd.DataFrame)->pd.DataFrame:
+def load(df)->pd.DataFrame:
     '''
     A function to read and load the streamlit dataframe into pandas dataframe.
 
@@ -11,14 +11,14 @@ def load(df:pd.DataFrame)->pd.DataFrame:
     Return:
         - df: a pandas dataframe
     '''
-    df_name = df.name
-
-    # check file type and read them accordingly
-    if df_name[-3:] == 'csv':
+    try:
         df = pd.read_csv(df, na_filter=False)
-    else:
-        df = pd.read_excel(df, na_filter=False)
-    
+    except Exception as e:
+        try:
+            df = pd.read_excel(df, na_filter=False)
+        except Exception as e:
+            print(f"The uploaded file is not CSV or XLSX!")
+            return None
     return df
 
 def demography(df:pd.DataFrame)->list:
