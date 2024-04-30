@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 
-def load(df)->pd.DataFrame:
+def load(df: pd.DataFrame)->pd.DataFrame:
     '''
     A function to read and load the streamlit dataframe into pandas dataframe.
 

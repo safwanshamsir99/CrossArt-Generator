@@ -403,7 +403,7 @@ def init_chart_gen():
     try:
         df_charts = upload_crosstabs()
         if df_charts:
-            dfs, sheet_names, df_chartsname = load_chart(df_charts=df_charts)
+            dfs, sheet_names, df_chartsname = load_chart(df_charts=df_charts, filename=True)
             df_charts = draw_chart(dfs=dfs, sheet_names=sheet_names)
             df_chartsname = df_chartsname[:df_chartsname.find('.')]
             st.balloons()

@@ -5,7 +5,8 @@ from fastapi import (
     UploadFile,
     HTTPException
     )
-import os
+from io import BytesIO
+import base64
 from typing import List, Dict
 from .utils_module.utils import load, demography, col_search, sorter
 from .chart_module.chart import load_chart
@@ -168,14 +169,14 @@ async def read_crosstabs(file: UploadFile = None):
     Endpoint to read and load the streamlit dataframe into pandas dataframe.
 
     Request:
-        - df_charts: Whole dataframe [streamlit dataframe]
+        - file: File that contains crosstabs table.
     
     Return:
         - dfs: List of pandas dataframe.
         - sheet_names: List of name of the sheet
-        - df_chartsname: Name of the uploaded file
     '''
-    dfs, sheet_names, _ = load_chart(df_charts=file.file)
+    df_in_memory = BytesIO(file.file.read())
+    dfs, sheet_names, _ = load_chart(df_charts=df_in_memory)
     df_charts["dfs"] = dfs
     sheet_names_list["sheet_name"] = sheet_names
     return{
@@ -206,10 +207,11 @@ async def generate_chart():
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No crosstabs data has been loaded."
         )
-    df_charts = draw_chart(
+    charts = draw_chart(
         dfs=dfs,
         sheet_names=sheet_names
     )
-    return {"charts": df_charts}
+    encoded_charts = base64.b64encode(charts).decode()
+    return {"charts": encoded_charts}
 
 app.include_router(router)
