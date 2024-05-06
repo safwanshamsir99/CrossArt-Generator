@@ -1,17 +1,18 @@
 from fastapi import (
     FastAPI, 
     status, 
-    APIRouter,
-    UploadFile,
-    HTTPException
+    APIRouter
     )
-from io import BytesIO
+from io import StringIO
 import base64
-from typing import List, Dict
+from fastapi.encoders import jsonable_encoder
+import json
+import pandas as pd
 from .utils_module.utils import load, demography, col_search, sorter
 from .chart_module.chart import load_chart
 from .component_module.table import write_table
 from .component_module.viz import draw_chart
+from .schema import CrosstabSchema, ChartSchema, DataframeSchema
 
 description = """
 This is a crosstabs generator API from crosstabs-generator-v3.
@@ -26,108 +27,99 @@ app = FastAPI(
     }
 )
 
-router = APIRouter(prefix="/crossart")
+# router = APIRouter(prefix="/crossart")
 
-@router.get("/", status_code=status.HTTP_200_OK, tags=["test"])
+@app.get("/", status_code=status.HTTP_200_OK, tags=["test"])
 def root():
     return {"status": "ok",
             "type": "crosstabsgen"}
 
 # --------------------------- Crosstab Generator Endpoint ------------------------------------------
-df_crosstabs = {}
-@router.post("/read", tags=["Read dataset"])
-async def read_data(file: UploadFile = None):
-    '''
-    Endpoint to read and load the streamlit dataframe into pandas dataframe.
+# @router.post("/read", tags=["Read dataset"])
+# async def read_data(file: UploadFile = None):
+#     '''
+#     Endpoint to read and load the streamlit dataframe into pandas dataframe.
 
-    Request:
-        - df: Survey data.
+#     Request:
 
-    Return:
-        - df: a pandas dataframe
-    '''
-    read_df = load(df=file.file)
-    df_crosstabs["df"] = read_df
-    return {"message": "Survey data has been loaded successfully."}
+#         - file: Survey data.
 
-@router.post("/demography", tags=["Auto-select demo"])
-async def autoselect_demography():
-    '''
-    Endpoint to autoselect the demography columns.
+#     Return:
 
-    Return:
-        - default_demo: list of the column that contains string like 'age', 'gender', 'eth', 'income', 'urban'.
-    '''
-    df = df_crosstabs.get("df")
-    if df is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No survey data has been loaded."
-        )
-    demo_list = demography(df=df)
-    return {"demo_list": demo_list}
+#         - df: a pandas dataframe
+#     '''
+#     read_df = load(df=file.file)
+#     return {"df_reader": read_df}
 
-@router.post("/colsearch", tags=["Column search"])
-async def get_search_column(key:str):
-    '''
-    Endpoint to autoselect column/s with the keyword.
+# @router.post("/demography", tags=["Auto-select demo"])
+# async def autoselect_demography(df: Dict):
+#     '''
+#     Endpoint to autoselect the demography columns.
 
-    Request:
-        - df: Whole dataframe [pandas dataframe]
-        - key: keyword to match [str]
+#     Request:
 
-    Return:
-        - columns_with_string: list of the column that contains certain keyword.
-    '''
-    df = df_crosstabs.get("df")
-    if df is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No survey data has been loaded."
-        )
-    columns_with_string = col_search(
-        df=df,
-        key=key
-    )
-    return {"column with string": columns_with_string}
+#         - df: Whole dataframe in JSON format.
 
-@router.post("/demo_sorter", tags=["Demography sorter"])
-async def get_demo_sorter(demo: str):
-    '''
-    Endpoint to sort the list of the unique value in the demographic column.
+#     Return:
 
-    Request:
-        - demo: Column name of the demography you're building the table on [str]
+#         - default_demo: list of the column that contains string like 'age', 'gender', 'eth', 'income', 'urban'.
+#     '''
+#     df = pd.DataFrame.from_dict(df, orient='index')
+#     demo_list = demography(df=df)
+#     return {"demo_list": demo_list}
 
-    Return:
-        - sorted list of unique values from specific column in the dataframe.
-    '''
-    df = df_crosstabs.get("df")
-    if df is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No survey data has been loaded."
-        )
-    sort_demo = sorter(
-        demo=demo,
-        df=df
-    )
-    return {"sort_demography": sort_demo}
+# @router.post("/colsearch", tags=["Column search"])
+# async def get_search_column(df: Dict, key: str):
+#     '''
+#     Endpoint to autoselect column/s with the keyword.
 
-@router.post("/crosstabs", tags=["Crosstabs Generator"])
-async def generate_crosstabs(
-    demos: List[str], 
-    wise: str,
-    q_ls: List[str],
-    multi: List[str], 
-    name_sort: List[str], 
-    weight: str,
-    col_seqs: Dict):
+#     Request:
+
+#         - df: Whole dataframe in JSON format.
+#         - key: keyword to match [str]
+
+#     Return:
+
+#         - columns_with_string: list of the column that contains certain keyword.
+#     '''
+#     df = pd.DataFrame.from_dict(df, orient='index')
+#     print(df)
+#     columns_with_string = col_search(
+#         df=df,
+#         key=key
+#     )
+#     return {"column_with_string": columns_with_string}
+
+# @router.post("/demo_sorter", tags=["Demography sorter"])
+# async def get_demo_sorter(demo: str, df: Dict):
+#     '''
+#     Endpoint to sort the list of the unique value in the demographic column.
+
+#     Request:
+
+#         - demo: Column name of the demography you're building the table on [str]
+#         - df: Whole dataframe in JSON format.
+
+#     Return:
+
+#         - sorted list of unique values from specific column in the dataframe.
+#     '''
+#     df = pd.DataFrame(df['df'])
+#     sort_demo = sorter(
+#         demo=demo,
+#         df=df
+#     )
+#     return {"sort_demography": sort_demo} 
+    # df_json = pd.read_json(crosstabs.df, orient="columns")
+
+@app.post("/crosstabs", tags=["Crosstabs Generator"])
+async def generate_crosstabs(crosstabs: CrosstabSchema):
     '''
     Endpoint to generate crosstabs based on the weighted survey file.
 
     Request:
-        - df: pandas DataFrame 
+
+        - df: Whole dataframe in JSON string format.
         - demos: List of name of the selected demography columns. 
         - wise: User selection of the value options. 
         - q_ls: List of question column. 
@@ -139,79 +131,84 @@ async def generate_crosstabs(
             - Value: Sorted unique value of the key demography column.
     
     Return:
-        - df_xlsx: conversion result of pandas ExcelWriter that contains crosstabs table into bytes.
+    
+        - data: df_xlsx in encoded bytes.
     '''
-    df = df_crosstabs.get("df")
-    if df is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No survey data has been loaded."
-        )
+    df_json = pd.read_json(StringIO(crosstabs.df), orient="records")
     df_xlsx = write_table(
-        df=df,
-        demos=demos,
-        wise=wise,
-        q_ls=q_ls,
-        multi=multi,
-        name_sort=name_sort,
-        weight=weight,
-        col_seqs=col_seqs
+        df=df_json,
+        demos=crosstabs.demos,
+        wise=crosstabs.wise,
+        q_ls=crosstabs.q_ls,
+        multi=crosstabs.multi,
+        name_sort=crosstabs.name_sort,
+        weight=crosstabs.weight,
+        col_seqs=crosstabs.col_seqs
     )
-    return {"crosstabs": df_xlsx}
-
+    data = {
+        "crosstabs": jsonable_encoder(
+            df_xlsx,
+            custom_encoder={
+                bytes: lambda value: base64.b64encode(value).decode("utf-8")
+            }
+        )
+    }
+    return data
 
 # --------------------------- Chart Generator Endpoint ------------------------------------------
-df_charts = {}
-sheet_names_list = {}
-@router.post("/read_crosstabs", tags=["Read"])
-async def read_crosstabs(file: UploadFile = None):
+@app.post("/read_crosstabs", tags=["Read"])
+async def read_crosstabs(ctreader: DataframeSchema):
     '''
     Endpoint to read and load the streamlit dataframe into pandas dataframe.
 
     Request:
-        - file: File that contains crosstabs table.
+
+        - df_charts: Whole dataframe [streamlit dataframe]
     
     Return:
+
         - dfs: List of pandas dataframe.
         - sheet_names: List of name of the sheet
     '''
-    df_in_memory = BytesIO(file.file.read())
-    dfs, sheet_names, _ = load_chart(df_charts=df_in_memory)
-    df_charts["dfs"] = dfs
-    sheet_names_list["sheet_name"] = sheet_names
-    return{
-        "message": "Crosstabs data has been loaded successfully."
-    }
+    dfs, sheet_names, _ = load_chart(df_charts=ctreader.df)
 
-@router.post("/chart", tags=["Chart Generator"])
-async def generate_chart():
+    data = {
+        "df_list": jsonable_encoder(
+            dfs,
+            custom_encoder={
+                bytes: lambda value: base64.b64encode(value).decode("utf-8")
+            }
+        ),
+        "sheet_names": sheet_names,
+    }
+    return data
+
+@app.post("/chart", tags=["Chart Generator"])
+async def generate_chart(chart: ChartSchema):
     '''
     Endpoint to generate charts based on the crosstabs table.
 
     Request:
-        - dfs: list of pandas DataFrame 
+
+        - dfs: list of pandas DataFrame in JSON string format. 
         - sheet_names: list of the sheet names in the crosstabs file. 
 
     Return:
-        - df_charts: crosstabs table that contains clustered column chart in bytes.
-    '''
-    dfs = df_charts.get("dfs")
-    if dfs is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No crosstabs data has been loaded."
-        )
-    sheet_names = sheet_names_list.get("sheet_name")
-    if sheet_names is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No crosstabs data has been loaded."
-        )
-    charts = draw_chart(
-        dfs=dfs,
-        sheet_names=sheet_names
-    )
-    encoded_charts = base64.b64encode(charts).decode()
-    return {"charts": encoded_charts}
 
-app.include_router(router)
+        - data: charts in encoded bytes.
+    '''
+    charts = draw_chart(
+        dfs=chart.dfs,
+        sheet_names=chart.sheet_names
+    )
+    data = {
+        "crosstabs": jsonable_encoder(
+            charts,
+            custom_encoder={
+                bytes: lambda value: base64.b64encode(value).decode("utf-8")
+            }
+        )
+    }
+    return data
+
+# app.include_router(router)
