@@ -1,18 +1,21 @@
 from fastapi import (
     FastAPI, 
     status, 
-    APIRouter
+    APIRouter,
+    UploadFile,
+    File
     )
 from io import StringIO
 import base64
 from fastapi.encoders import jsonable_encoder
-import json
+import os
+import shutil
 import pandas as pd
 from .utils_module.utils import load, demography, col_search, sorter
 from .chart_module.chart import load_chart
 from .component_module.table import write_table
 from .component_module.viz import draw_chart
-from .schema import CrosstabSchema, ChartSchema, DataframeSchema
+from .schema import CrosstabSchema, ChartSchema
 
 description = """
 This is a crosstabs generator API from crosstabs-generator-v3.
@@ -27,29 +30,43 @@ app = FastAPI(
     }
 )
 
-# router = APIRouter(prefix="/crossart")
+router = APIRouter(prefix="/crossart")
 
-@app.get("/", status_code=status.HTTP_200_OK, tags=["test"])
+@router.get("/", status_code=status.HTTP_200_OK, tags=["test"])
 def root():
     return {"status": "ok",
             "type": "crosstabsgen"}
 
 # --------------------------- Crosstab Generator Endpoint ------------------------------------------
-# @router.post("/read", tags=["Read dataset"])
-# async def read_data(file: UploadFile = None):
-#     '''
-#     Endpoint to read and load the streamlit dataframe into pandas dataframe.
+@router.post("/read", tags=["Read dataset"])
+async def read_data(file: UploadFile = File(...)):
+    '''
+    Endpoint to read and load the streamlit dataframe into pandas dataframe.
 
-#     Request:
+    Request:
 
-#         - file: Survey data.
+        - file: Filepath or buffer(Streamlit dataframe/SpooledTemporaryFile)
 
-#     Return:
+    Return:
 
-#         - df: a pandas dataframe
-#     '''
-#     read_df = load(df=file.file)
-#     return {"df_reader": read_df}
+        - df: a pandas dataframe
+    '''
+    os.makedirs('temp', exist_ok=True)
+    path =  f"temp/{file.filename}"
+    with open(path, 'w+b') as f:
+        shutil.copyfileobj(file.file, f)
+    read_df = load(df=path)
+    data = {
+        "df_reader": jsonable_encoder(
+            read_df,
+            custom_encoder={
+                bytes: lambda value: base64.b64encode(value).decode("utf-8")
+            }
+        )
+    }
+    os.remove(path)
+    shutil.rmtree('temp')
+    return data
 
 # @router.post("/demography", tags=["Auto-select demo"])
 # async def autoselect_demography(df: Dict):
@@ -109,10 +126,9 @@ def root():
 #         demo=demo,
 #         df=df
 #     )
-#     return {"sort_demography": sort_demo} 
-    # df_json = pd.read_json(crosstabs.df, orient="columns")
+#     return {"sort_demography": sort_demo}
 
-@app.post("/crosstabs", tags=["Crosstabs Generator"])
+@router.post("/crosstabs", tags=["Crosstabs Generator"])
 async def generate_crosstabs(crosstabs: CrosstabSchema):
     '''
     Endpoint to generate crosstabs based on the weighted survey file.
@@ -156,34 +172,34 @@ async def generate_crosstabs(crosstabs: CrosstabSchema):
     return data
 
 # --------------------------- Chart Generator Endpoint ------------------------------------------
-@app.post("/read_crosstabs", tags=["Read"])
-async def read_crosstabs(ctreader: DataframeSchema):
+@router.post("/read_crosstabs", tags=["Read"])
+async def read_crosstabs(file: UploadFile = File(...)):
     '''
     Endpoint to read and load the streamlit dataframe into pandas dataframe.
 
     Request:
 
-        - df_charts: Whole dataframe [streamlit dataframe]
+        - df_charts: Filepath or buffer(Streamlit dataframe/SpooledTemporaryFile)
     
     Return:
 
         - dfs: List of pandas dataframe.
-        - sheet_names: List of name of the sheet
+        - sheet_names: List of name of the sheet 
     '''
-    dfs, sheet_names, _ = load_chart(df_charts=ctreader.df)
-
+    os.makedirs('temp', exist_ok=True)
+    path =  f"temp/{file.filename}"
+    with open(path, 'w+b') as f:
+        shutil.copyfileobj(file.file, f)
+    dfs, sheet_names, _ = load_chart(df_charts=path)
     data = {
-        "df_list": jsonable_encoder(
-            dfs,
-            custom_encoder={
-                bytes: lambda value: base64.b64encode(value).decode("utf-8")
-            }
-        ),
+        "df_list": [df.to_json(orient="records") for df in dfs],
         "sheet_names": sheet_names,
     }
+    os.remove(path)
+    shutil.rmtree('temp')
     return data
 
-@app.post("/chart", tags=["Chart Generator"])
+@router.post("/chart", tags=["Chart Generator"])
 async def generate_chart(chart: ChartSchema):
     '''
     Endpoint to generate charts based on the crosstabs table.
@@ -197,12 +213,13 @@ async def generate_chart(chart: ChartSchema):
 
         - data: charts in encoded bytes.
     '''
+    dfs = [pd.read_json(StringIO(df), orient='records') for df in chart.dfs]
     charts = draw_chart(
-        dfs=chart.dfs,
+        dfs=dfs,
         sheet_names=chart.sheet_names
     )
     data = {
-        "crosstabs": jsonable_encoder(
+        "charts": jsonable_encoder(
             charts,
             custom_encoder={
                 bytes: lambda value: base64.b64encode(value).decode("utf-8")
@@ -211,4 +228,4 @@ async def generate_chart(chart: ChartSchema):
     }
     return data
 
-# app.include_router(router)
+app.include_router(router)

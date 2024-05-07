@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Json
-from typing import List, Dict, Any
+from typing import List, Dict
 
 class DataframeSchema(BaseModel):
     '''
@@ -45,7 +45,7 @@ class CrosstabSchema(DataframeSchema):
 
 class ChartSchema(BaseModel):
     '''
-    dfs: list of dataframe in JSON
+    dfs: list of dataframe in JSON string
     sheet_names: list of the sheet names in the crosstabs file.
     '''
     dfs: List[str]

@@ -8,7 +8,7 @@ def load_chart(df_charts: pd.DataFrame, filename: bool = False)->tuple[list[pd.D
     A function to read and load the streamlit dataframe into pandas dataframe.
     
     Args:
-        - df_charts: Whole dataframe [streamlit dataframe]
+        - df_charts: Filepath or buffer(Streamlit dataframe/SpooledTemporaryFile)
         - filename: booleean to store the name of the file [default=False]
     
     Return:

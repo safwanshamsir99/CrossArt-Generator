@@ -1,41 +1,35 @@
 from fastapi.testclient import TestClient
 from app.endpoint import app
+from app.chart_module.chart import load_chart
 from pathlib import Path
 import pandas as pd
-from typing import Dict
 import json
-from io import StringIO
 
 client = TestClient(app)
 
-# API_ROUTER_PREFIX = "crossart"
+API_ROUTER_PREFIX = "crossart"
 
 survey_file_path = Path.cwd() / 'tests' / 'test_crosstabs.csv'
-json_file_path = Path.cwd() / 'tests' / 'test_crosstabs.json'
-
-# def csv_to_json(survey_file_path):
-#     df = pd.read_csv(survey_file_path)
-#     return df.to_json()
-
-# df_json = csv_to_json(survey_file_path) {API_ROUTER_PREFIX}
+crosstab_file_path = Path.cwd() / 'tests' / 'test_chartgen.xlsx'
 
 def test_root():
-    response = client.get("/")
+    response = client.get(f"/{API_ROUTER_PREFIX}")
     assert response.status_code == 200, "Response 404, failed"
     assert response.json() == {"status": "ok", "type": "crosstabsgen"}, "No response"
 
-# def test_read_data():
-#     with survey_file_path.open('rb') as file:
-#         response = client.post(
-#             f"/{API_ROUTER_PREFIX}/read", 
-#             files={
-#                 "file": ("test_crosstabs.csv", file, "text/csv")
-#             })
-#     assert response.status_code == 200, "Response 404, failed"
-#     assert "df_reader" in response.json()
-#     assert isinstance(
-#         response.json()["df_reader"], Dict
-#     ), "response.json() is not a dictionary"
+# --------------------------- Crosstab Generator Endpoint ------------------------------------------
+def test_read_data():
+    with open(survey_file_path, 'rb') as f:
+        response = client.post(
+            f"/{API_ROUTER_PREFIX}/read", 
+            files={
+                "file": f
+            })
+    assert response.status_code == 200, "Response 404, failed"
+    json_data = json.loads(json.dumps(response.json()))
+    assert "df_reader" in json_data
+    # df = pd.read_json(json_data["df_reader"])
+    # return df
 
 # def test_autoselect_demography():
 #     response = client.post(
@@ -73,7 +67,7 @@ def test_generate_crosstabs():
     df = pd.read_csv(survey_file_path)
     df_json = df.to_json(orient="records")
     response = client.post(
-        "/crosstabs",
+        f"/{API_ROUTER_PREFIX}/crosstabs",
         json={
             "df": df_json,
             "demos": ["Gender"],
@@ -89,24 +83,32 @@ def test_generate_crosstabs():
     json_data = json.loads(json.dumps(response.json()))
     assert "crosstabs" in json_data
 
-# def test_read_crosstabs():
-#     crosstab_file_path = Path.cwd() / 'tests' / 'test_chartgen.xlsx'
-#     with crosstab_file_path.open('rb') as file:
-#         response = client.post(
-#             f"/{API_ROUTER_PREFIX}/read_crosstabs", 
-#             files={
-#                 "file": ("test_chartgen.xlsx", file, "text/xlsx")
-#             })
-#     assert response.status_code == 200, "Response 404, failed"
-#     assert response.json() == {"message": "Crosstabs data has been loaded successfully."}
+# --------------------------- Chart Generator Endpoint ------------------------------------------
+def test_read_crosstabs():
+    with open(crosstab_file_path, "rb") as f:
+        response = client.post(
+            f"/{API_ROUTER_PREFIX}/read_crosstabs", 
+            files={
+                "file": f
+            }
+        )
+    assert response.status_code == 200, "Response 404, failed"
+    json_data = json.loads(json.dumps(response.json()))
+    assert "df_list" in json_data
+    assert "sheet_names" in json_data
+    dfs = [pd.read_json(df) for df in json_data["df_list"]]
+    sheet_names = json_data["sheet_names"]
+    return dfs, sheet_names
 
-# def test_generate_chart():
-#     response = client.post(
-#         "/chart",
-#         json={
-#             "dfs": "",
-#             "sheet_names": ""
-#         }
-#         )
-#     assert response.status_code == 200,"Response 404, failed"
-#     assert "charts" in response.json()
+def test_generate_chart():
+    dfs, sheet_names = test_read_crosstabs()
+    dfs_json = [df.to_json(orient="records") for df in dfs]
+    response = client.post(
+        f"/{API_ROUTER_PREFIX}/chart",
+        json={
+            "dfs": dfs_json,
+            "sheet_names": sheet_names
+        })
+    assert response.status_code == 200,"Response 404, failed"
+    json_data = json.loads(json.dumps(response.json()))
+    assert "charts" in json_data
