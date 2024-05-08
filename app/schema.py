@@ -1,15 +1,14 @@
 from pydantic import BaseModel
-import pandas as pd
 from typing import List, Dict
 
 class DataframeSchema(BaseModel):
     '''
-    df: dataframe that consists survey responses.
-    '''
-    df: pd.DataFrame
+    df: JSON string that contains survey response in dictionary.
 
-    class Config:
-        arbitrary_types_allowed = True
+    Eg: 
+        - '{"1. [LIKERT] Opinions":"5)Very Negative","2. What is your dream job field?":"Entrepreneurship","Gender":"Male","IncomeGroup":"B40","untrimmed_weight":0.506694401,"trimmed_weight":1.14631426}'
+    '''
+    df: str
 
 class ColumnSearchSchema(DataframeSchema):
     '''
@@ -25,7 +24,7 @@ class DemoSorterSchema(DataframeSchema):
 
 class CrosstabSchema(DataframeSchema): 
     '''
-    df: pandas DataFrame 
+    df: dataframe in JSON string that contains survey response in dictionary.
     demos: List of name of the selected demography columns. 
     wise: User selection of the value options. 
     q_ls: List of question column. 
@@ -39,18 +38,15 @@ class CrosstabSchema(DataframeSchema):
     demos: List[str] 
     wise: str
     q_ls: List[str] 
-    multi: List[str] 
-    name_sort: List[str] 
+    multi: List[str] = None
+    name_sort: List[str] = None
     weight: str
     col_seqs: Dict
 
 class ChartSchema(BaseModel):
     '''
-    dfs: list of pandas DataFrame 
+    dfs: list of dataframe in JSON string
     sheet_names: list of the sheet names in the crosstabs file.
     '''
-    dfs: List[pd.DataFrame]
+    dfs: List[str]
     sheet_names: List[str]
-
-    class Config:
-        arbitrary_types_allowed = True

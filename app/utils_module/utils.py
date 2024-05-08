@@ -6,20 +6,19 @@ def load(df:pd.DataFrame)->pd.DataFrame:
     A function to read and load the streamlit dataframe into pandas dataframe.
 
     Args:
-        - df: Whole dataframe [streamlit dataframe]
+        - df: Filepath or buffer(Streamlit dataframe/SpooledTemporaryFile)
 
     Return:
         - df: a pandas dataframe
     '''
-    df_name = df.name
-
-    # check file type and read them accordingly
-    if df_name[-3:] == 'csv':
-        df = pd.read_csv(df, na_filter=False)
-    else:
-        df = pd.read_excel(df, na_filter=False)
-    
-    return df
+    try:
+        read_df = pd.read_csv(df, na_filter=False)
+    except Exception:
+        try:
+            read_df = pd.read_excel(df, na_filter=False)
+        except Exception:
+            read_df = df
+    return read_df
 
 def demography(df:pd.DataFrame)->list:
     '''
