@@ -1,6 +1,5 @@
 from fastapi.testclient import TestClient
 from app.endpoint import app
-from app.chart_module.chart import load_chart
 from pathlib import Path
 import pandas as pd
 import json
@@ -28,43 +27,55 @@ def test_read_data():
     assert response.status_code == 200, "Response 404, failed"
     json_data = json.loads(json.dumps(response.json()))
     assert "df_reader" in json_data
-    # df = pd.read_json(json_data["df_reader"])
-    # return df
+    df = pd.DataFrame(json_data["df_reader"])
+    return df
 
-# def test_autoselect_demography():
-#     response = client.post(
-#         f"/{API_ROUTER_PREFIX}/demography",
-#         json={"df": json.loads(df_json)}
-#         )
-#     assert response.status_code == 200,"Response 404, failed"
-#     assert "demo_list" in response.json()
-#     assert response.json()["demo_list"] == ["Gender","IncomeGroup"], "Expected output is wrong."
+def test_autoselect_demography():
+    df = test_read_data()
+    df_json = df.to_json(orient="records")
+    response = client.post(
+        f"/{API_ROUTER_PREFIX}/demography",
+        json={
+            "df": df_json
+        }
+    )
+    assert response.status_code == 200,"Response 404, failed"
+    json_data = json.loads(json.dumps(response.json()))
+    assert "demo_list" in json_data
+    assert json_data["demo_list"] == ["Gender","IncomeGroup"], "Expected output is wrong."
 
-# def test_get_search_column():
-#     print(pd.DataFrame.from_dict(json.loads(df_json)))
-#     response = client.post(
-#         f"/{API_ROUTER_PREFIX}/colsearch",
-#         json={
-#             "df": json.loads(df_json),
-#             "key": "LIKERT"
-#             }
-#     )
-#     assert response.status_code == 200, "Response 404, failed"
-#     assert "column_with_string" in response.json()
-#     assert response.json()["column_with_string"] == ["1. [LIKERT] Opinions"], "Exected output is wrong."
+def test_get_search_column():
+    df = test_read_data()
+    df_json = df.to_json(orient="records")
+    response = client.post(
+        f"/{API_ROUTER_PREFIX}/colsearch",
+        json={
+            "df": df_json,
+            "key": "LIKERT"
+            }
+    )
+    assert response.status_code == 200, "Response 404, failed"
+    json_data = json.loads(json.dumps(response.json()))
+    assert "column_with_string" in json_data
+    assert json_data["column_with_string"] == ["1. [LIKERT] Opinions"], "Expected output is wrong."
 
-# def test_get_demo_sorter():
-#     test_read_data()
-#     response = client.post(
-#         f"/{API_ROUTER_PREFIX}/demo_sorter",
-#         json={"demo": "Gender"} {API_ROUTER_PREFIX}
-#     )
-#     assert response.status_code == 200, "Response 404, failed"
-#     assert "sort_demography" in response.json()
-#     assert response.json()["sort_demography"] == ["Male","Female"], "Expected output is wrong."
+def test_get_demo_sorter():
+    df = test_read_data()
+    df_json = df.to_json(orient="records")
+    response = client.post(
+        f"/{API_ROUTER_PREFIX}/demo_sorter",
+        json={
+            "demo": "Gender",
+            "df": df_json
+            }
+    )
+    assert response.status_code == 200, "Response 404, failed"
+    json_data = json.loads(json.dumps(response.json()))
+    assert "sort_demography" in json_data
+    assert json_data["sort_demography"] == ["Male","Female"], "Expected output is wrong."
 
 def test_generate_crosstabs():
-    df = pd.read_csv(survey_file_path)
+    df = test_read_data()
     df_json = df.to_json(orient="records")
     response = client.post(
         f"/{API_ROUTER_PREFIX}/crosstabs",

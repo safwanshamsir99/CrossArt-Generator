@@ -15,7 +15,13 @@ from .utils_module.utils import load, demography, col_search, sorter
 from .chart_module.chart import load_chart
 from .component_module.table import write_table
 from .component_module.viz import draw_chart
-from .schema import CrosstabSchema, ChartSchema
+from .schema import (
+    CrosstabSchema, 
+    ChartSchema, 
+    DataframeSchema,
+    ColumnSearchSchema,
+    DemoSorterSchema
+    )
 
 description = """
 This is a crosstabs generator API from crosstabs-generator-v3.
@@ -68,65 +74,73 @@ async def read_data(file: UploadFile = File(...)):
     shutil.rmtree('temp')
     return data
 
-# @router.post("/demography", tags=["Auto-select demo"])
-# async def autoselect_demography(df: Dict):
-#     '''
-#     Endpoint to autoselect the demography columns.
+@router.post("/demography", tags=["Auto-select demo"])
+async def autoselect_demography(demo: DataframeSchema):
+    '''
+    Endpoint to autoselect the demography columns.
 
-#     Request:
+    Request:
 
-#         - df: Whole dataframe in JSON format.
+        - df: Whole dataframe in JSON string format.
 
-#     Return:
+    Return:
 
-#         - default_demo: list of the column that contains string like 'age', 'gender', 'eth', 'income', 'urban'.
-#     '''
-#     df = pd.DataFrame.from_dict(df, orient='index')
-#     demo_list = demography(df=df)
-#     return {"demo_list": demo_list}
+        - default_demo: list of the column that contains string like 'age', 'gender', 'eth', 'income', 'urban'.
+    '''
+    df_json = pd.read_json(StringIO(demo.df), orient="records")
+    demo_list = demography(df=df_json)
+    data = {
+        "demo_list": demo_list
+        }
+    return data
 
-# @router.post("/colsearch", tags=["Column search"])
-# async def get_search_column(df: Dict, key: str):
-#     '''
-#     Endpoint to autoselect column/s with the keyword.
+@router.post("/colsearch", tags=["Column search"])
+async def get_search_column(search_col: ColumnSearchSchema):
+    '''
+    Endpoint to autoselect column/s with the keyword.
 
-#     Request:
+    Request:
 
-#         - df: Whole dataframe in JSON format.
-#         - key: keyword to match [str]
+        - df: Whole dataframe in JSON string format.
+        - key: keyword to match [str]
 
-#     Return:
+    Return:
 
-#         - columns_with_string: list of the column that contains certain keyword.
-#     '''
-#     df = pd.DataFrame.from_dict(df, orient='index')
-#     print(df)
-#     columns_with_string = col_search(
-#         df=df,
-#         key=key
-#     )
-#     return {"column_with_string": columns_with_string}
+        - columns_with_string: list of the column that contains certain keyword.
+    '''
+    df_json = pd.read_json(StringIO(search_col.df), orient="records")
+    columns_with_string = col_search(
+        df=df_json,
+        key=search_col.key
+    )
+    data = {
+        "column_with_string": columns_with_string
+        }
+    return data
 
-# @router.post("/demo_sorter", tags=["Demography sorter"])
-# async def get_demo_sorter(demo: str, df: Dict):
-#     '''
-#     Endpoint to sort the list of the unique value in the demographic column.
+@router.post("/demo_sorter", tags=["Demography sorter"])
+async def get_demo_sorter(demo_sorter: DemoSorterSchema):
+    '''
+    Endpoint to sort the list of the unique value in the demographic column.
 
-#     Request:
+    Request:
 
-#         - demo: Column name of the demography you're building the table on [str]
-#         - df: Whole dataframe in JSON format.
+        - demo: Column name of the demography you're building the table on [str]
+        - df: Whole dataframe in JSON string format.
 
-#     Return:
+    Return:
 
-#         - sorted list of unique values from specific column in the dataframe.
-#     '''
-#     df = pd.DataFrame(df['df'])
-#     sort_demo = sorter(
-#         demo=demo,
-#         df=df
-#     )
-#     return {"sort_demography": sort_demo}
+        - sorted list of unique values from specific column in the dataframe.
+    '''
+    df_json = pd.read_json(StringIO(demo_sorter.df), orient="records")
+    sort_demo = sorter(
+        demo=demo_sorter.demo,
+        df=df_json
+    )
+    data = {
+        "sort_demography": sort_demo
+    }
+    return data
 
 @router.post("/crosstabs", tags=["Crosstabs Generator"])
 async def generate_crosstabs(crosstabs: CrosstabSchema):
@@ -206,7 +220,7 @@ async def generate_chart(chart: ChartSchema):
 
     Request:
 
-        - dfs: list of pandas DataFrame in JSON string format. 
+        - dfs: list of pandas DataFrame in JSON string format -> List[str]
         - sheet_names: list of the sheet names in the crosstabs file. 
 
     Return:

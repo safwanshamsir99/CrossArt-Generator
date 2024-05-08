@@ -12,14 +12,13 @@ def load(df:pd.DataFrame)->pd.DataFrame:
         - df: a pandas dataframe
     '''
     try:
-        df = pd.read_csv(df, na_filter=False)
+        read_df = pd.read_csv(df, na_filter=False)
+    except Exception:
         try:
-            df = pd.read_excel(df, na_filter=False)
-        except:
-            print(f"The uploaded file is not CSV or XLSX!")
-    except:
-        print(f"The uploaded file is not CSV or XLSX!")
-    return df
+            read_df = pd.read_excel(df, na_filter=False)
+        except Exception:
+            read_df = df
+    return read_df
 
 def demography(df:pd.DataFrame)->list:
     '''

@@ -71,12 +71,12 @@ def read_file(df:Any)->tuple[pd.DataFrame,str]:
         - df: streamlit dataframe, Uploadedfile sub-class of BytesIO. 
 
     Return:
-        - df: pandas dataframe
+        - read_df: pandas dataframe
         - df_name: Name of the uploaded file
     '''
     df_name = df.name
-    df = load(df)
-    return df, df_name
+    read_df = load(df)
+    return read_df, df_name
 
 def weight_selection(df: pd.DataFrame)->str:
     '''
