@@ -20,45 +20,65 @@ This project aims to expedite our crosstab generation process from long minutes 
 2. **README.md** <br />
    Project documentation
 3. **generator.py** <br />
-   Project code
-4. **photos** <br />
+   Main script to be deployed on streamlit that call the front-end functions.
+4. **component.py** <br />
+   Contains front-end composite function components that call back-end functions for streamlit.
+5. **photos** <br />
    Contains INVOKE Analytics logo and INVOKE logo to be imported into generator.py
-5. **requirements.txt** <br />
-   List of the libraries and their respective versions required for the project
-6. **crosstab_module** <br />
-Contains all of the main functions to create the crosstabs.
-7. **utils_module** <br />
-Contains all of the helper functions for the crosstabs generator. Also, contains the processor functions that call functions from crosstab.py and utils.py
-8. **chart_module** <br />
-Contains all of the functions to create the clustered bar charts. 
-9. **component_module** <br />
-Contains all of the components; front-end component for streamlit and back-end component for crosstabs and charts. 
+6. **requirements.txt** <br />
+   List of the libraries and their respective versions required for the project to be read in streamlit.
+7. **tests** <br />
+   Contains scripts for unit testing, endpoint testing, and test files.
+8. **app** <br />
+   Contains all of the back-end functions, endpoints, schema, and requirements.txt for containerization.
+9. **app/crosstab_module** <br />
+   Contains all of the main functions to create the crosstabs.
+10. **app/utils_module** <br />
+   Contains all of the helper functions for the crosstabs generator. Also, contains the processor functions that call functions from crosstab.py and utils.py
+11. **app/chart_module** <br />
+   Contains all of the functions to create the clustered bar charts. 
+12. **app/component_module** <br />
+   Contains all of the components; front-end component for streamlit and back-end component for crosstabs and charts. 
+13. **app/schema.py** <br />
+   Pydantic schema for endpoint using FastAPI. 
+14. **app/schema.py** <br />
+   Pydantic schema for endpoint using FastAPI. 
+15. **app/endpoint.py** <br />
+   Contains crosstabs endpoints and chart endpoints, developed using FastAPI. 
+16. **app/requirements_d.txt** <br />
+   List of the libraries and their respective versions required for the project to be installed in docker image. 
 
 ### Folder Structure
 
 ```
 .
+├── LICENSE
 ├── README.md
-├── .streamlit/
-│   └── config.toml
-├── .github/
-│   └── dependabot.yml
-├── chart_module/
-│   └── chart.py
-├── crosstab_module/
-│   └── crosstab.py
-├── component_module/
-│   └── component.py
-│   └── table.py
-│   └── viz.py
-├── photos/
+├── app
+│   ├── __init__.py
+│   ├── chart_module
+│   │   └── chart.py
+│   ├── component_module
+│   │   └── viz.py
+│   ├── crosstab_module
+│   │   └── crosstab.py
+│   ├── endpoint.py
+│   ├── requirements_d.txt
+│   ├── schema.py
+│   └── utils_module
+│       ├── processor.py
+│       └── utils.py
+├── component.py
+├── generator.py
+├── photos
 │   ├── invoke_icon.jpg
 │   └── invoke_logo.png
-├── utils_module/
-│   ├── processor.py
-│   └── utils.py
-├── generator.py
-└── requirements.txt
+├── requirements.txt
+└── tests
+    ├── backend_test.py
+    ├── endpoint_test.py
+    ├── test_chartgen.xlsx
+    └── test_crosstabs.csv
 ```
 
 ### Progress
@@ -86,6 +106,9 @@ Contains all of the components; front-end component for streamlit and back-end c
 **5. Sort the order of crosstabs table:**
    * User can choose which column to sort by name [default sorting option is sorting by value].
 
+**6. REST API endpoint development:**
+   * Developer can now deploy the endpoints of crosstabs generator and charts generator.
+
 
 ### ⚠ Attention
 
@@ -99,9 +122,6 @@ Contains all of the components; front-end component for streamlit and back-end c
 
 **2. Add new demography in the demography sorter function for automation:**
 * [ ]  State demography.
- 
-**3. Combine of survey weighting platform and crosstabs generator:**
-* [ ]  Create APIs for crosstabs geerator and survey weighting platform.
 
 ### Built With
 
