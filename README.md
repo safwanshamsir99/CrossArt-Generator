@@ -49,7 +49,6 @@ This project aims to expedite our crosstab generation process from long minutes 
    List of the libraries and their respective versions required for the project to be installed in docker image. 
 
 ### Folder Structure
-
 ```
 .
 ├── LICENSE
